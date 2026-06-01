@@ -1,4 +1,5 @@
 export type ImageFormat = 'png' | 'jpeg' | 'gb7' | 'unknown'
+export type ExportFormat = 'png' | 'jpeg' | 'gb7'
 
 export type ImageDocument = {
   imageData: ImageData

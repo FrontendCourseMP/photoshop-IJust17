@@ -4,12 +4,14 @@ type StatusBarProps = {
   imageDocument: ImageDocument | null
   errorMessage: string
   isLoading: boolean
+  isExporting: boolean
 }
 
 export function StatusBar({
   imageDocument,
   errorMessage,
   isLoading,
+  isExporting,
 }: StatusBarProps) {
   const fileName = imageDocument?.fileName ?? 'не выбран'
   const format = imageDocument?.format.toUpperCase() ?? '-'
@@ -25,6 +27,7 @@ export function StatusBar({
       <span>Размер: {size}</span>
       <span>Глубина цвета: {colorDepth}</span>
       {isLoading && <span className="status-info">Загрузка...</span>}
+      {isExporting && <span className="status-info">Сохранение...</span>}
       {errorMessage && <span className="status-error">{errorMessage}</span>}
     </footer>
   )

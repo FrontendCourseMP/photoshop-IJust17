@@ -1,4 +1,4 @@
-import type { ImageDocument } from '../image/imageTypes'
+import type { ExportFormat, ImageDocument } from '../image/imageTypes'
 import { getColorDepth, getImageFormat } from '../image/imageUtils'
 
 export async function loadBrowserImage(file: File): Promise<ImageDocument> {
@@ -39,4 +39,59 @@ export async function loadBrowserImage(file: File): Promise<ImageDocument> {
     format,
     colorDepth: getColorDepth(imageData, format),
   }
+}
+
+export function exportBrowserImage(
+  imageData: ImageData,
+  format: ExportFormat,
+): Promise<Blob> {
+  if (format !== 'png' && format !== 'jpeg') {
+    throw new Error('Браузерный экспорт поддерживает только PNG и JPG.')
+  }
+
+  const canvas = document.createElement('canvas')
+  canvas.width = imageData.width
+  canvas.height = imageData.height
+
+  const context = canvas.getContext('2d')
+
+  if (!context) {
+    throw new Error('Не удалось подготовить canvas для экспорта.')
+  }
+
+  if (format === 'jpeg') {
+    const sourceCanvas = document.createElement('canvas')
+    sourceCanvas.width = imageData.width
+    sourceCanvas.height = imageData.height
+
+    const sourceContext = sourceCanvas.getContext('2d')
+
+    if (!sourceContext) {
+      throw new Error('Не удалось подготовить изображение для JPG.')
+    }
+
+    sourceContext.putImageData(imageData, 0, 0)
+    context.fillStyle = '#ffffff'
+    context.fillRect(0, 0, canvas.width, canvas.height)
+    context.drawImage(sourceCanvas, 0, 0)
+  } else {
+    context.putImageData(imageData, 0, 0)
+  }
+
+  const mimeType = format === 'png' ? 'image/png' : 'image/jpeg'
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error('Не удалось подготовить файл для скачивания.'))
+          return
+        }
+
+        resolve(blob)
+      },
+      mimeType,
+      0.92,
+    )
+  })
 }

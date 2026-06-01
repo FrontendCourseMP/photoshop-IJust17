@@ -1,4 +1,4 @@
-import type { ImageFormat } from './imageTypes'
+import type { ExportFormat, ImageFormat } from './imageTypes'
 
 export function getImageFormat(file: File): ImageFormat {
   const fileName = file.name.toLowerCase()
@@ -38,4 +38,11 @@ export function getColorDepth(imageData: ImageData, format: ImageFormat) {
   }
 
   return '24 бит (RGB)'
+}
+
+export function getExportFileName(fileName: string, format: ExportFormat) {
+  const baseName = fileName.replace(/\.[^/.]+$/, '')
+  const extension = format === 'jpeg' ? 'jpg' : format
+
+  return `${baseName}.${extension}`
 }
