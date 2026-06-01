@@ -2,9 +2,15 @@ import type { ImageDocument } from '../image/imageTypes'
 
 type StatusBarProps = {
   imageDocument: ImageDocument | null
+  errorMessage: string
+  isLoading: boolean
 }
 
-export function StatusBar({ imageDocument }: StatusBarProps) {
+export function StatusBar({
+  imageDocument,
+  errorMessage,
+  isLoading,
+}: StatusBarProps) {
   const fileName = imageDocument?.fileName ?? 'не выбран'
   const format = imageDocument?.format.toUpperCase() ?? '-'
   const size = imageDocument
@@ -18,6 +24,8 @@ export function StatusBar({ imageDocument }: StatusBarProps) {
       <span>Формат: {format}</span>
       <span>Размер: {size}</span>
       <span>Глубина цвета: {colorDepth}</span>
+      {isLoading && <span className="status-info">Загрузка...</span>}
+      {errorMessage && <span className="status-error">{errorMessage}</span>}
     </footer>
   )
 }

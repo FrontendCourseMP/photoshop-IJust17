@@ -1,16 +1,22 @@
-export function Toolbar() {
+type ToolbarProps = {
+  onFileChange: (file: File | null) => void
+  isLoading: boolean
+}
+
+export function Toolbar({ onFileChange, isLoading }: ToolbarProps) {
   return (
     <section className="toolbar" aria-label="Панель инструментов">
       <div className="toolbar-group">
         <label className="field-label" htmlFor="image-file">
-          Файл
+          Открыть
         </label>
         <input
           className="file-input"
           id="image-file"
           type="file"
-          accept=".png,.jpg,.jpeg,.gb7,image/png,image/jpeg"
-          disabled
+          accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+          disabled={isLoading}
+          onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
         />
       </div>
 
