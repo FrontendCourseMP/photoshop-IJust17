@@ -14,9 +14,12 @@ export function Toolbar({ onFileChange, isLoading }: ToolbarProps) {
           className="file-input"
           id="image-file"
           type="file"
-          accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+          accept=".png,.jpg,.jpeg,.gb7,image/png,image/jpeg"
           disabled={isLoading}
-          onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
+          onChange={(event) => {
+            onFileChange(event.target.files?.[0] ?? null)
+            event.currentTarget.value = ''
+          }}
         />
       </div>
 

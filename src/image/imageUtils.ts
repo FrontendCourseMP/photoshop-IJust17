@@ -15,10 +15,18 @@ export function getImageFormat(file: File): ImageFormat {
     return 'jpeg'
   }
 
+  if (fileName.endsWith('.gb7')) {
+    return 'gb7'
+  }
+
   return 'unknown'
 }
 
 export function getColorDepth(imageData: ImageData, format: ImageFormat) {
+  if (format === 'gb7') {
+    return '7 бит grayscale'
+  }
+
   if (format === 'jpeg') {
     return '24 бит (RGB)'
   }

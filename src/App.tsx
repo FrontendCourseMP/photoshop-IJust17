@@ -3,7 +3,7 @@ import { Header } from './components/Header'
 import { StatusBar } from './components/StatusBar'
 import { Toolbar } from './components/Toolbar'
 import { Workspace } from './components/Workspace'
-import { loadBrowserImage } from './codecs/browserCodec'
+import { loadImageFile } from './codecs/codecRegistry'
 import type { ImageDocument } from './image/imageTypes'
 import './App.css'
 
@@ -21,7 +21,7 @@ function App() {
     setErrorMessage('')
 
     try {
-      const nextImageDocument = await loadBrowserImage(file)
+      const nextImageDocument = await loadImageFile(file)
       setImageDocument(nextImageDocument)
     } catch (error) {
       const message =
