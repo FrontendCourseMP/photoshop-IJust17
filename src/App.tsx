@@ -1,19 +1,41 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { ChannelPanel } from './components/ChannelPanel'
 import { Header } from './components/Header'
 import { StatusBar } from './components/StatusBar'
 import { Toolbar } from './components/Toolbar'
 import { Workspace } from './components/Workspace'
 import { exportImageFile, loadImageFile } from './codecs/codecRegistry'
+import {
+  applyChannelVisibility,
+  createDefaultChannelVisibility,
+} from './image/channelUtils'
 import { getExportFileName } from './image/imageUtils'
-import type { ExportFormat, ImageDocument } from './image/imageTypes'
+import type {
+  ChannelKey,
+  ExportFormat,
+  ImageDocument,
+  PixelSample,
+} from './image/imageTypes'
 import './App.css'
 
 function App() {
   const [imageDocument, setImageDocument] = useState<ImageDocument | null>(null)
   const [exportFormat, setExportFormat] = useState<ExportFormat>('png')
+  const [channelVisibility, setChannelVisibility] = useState(
+    createDefaultChannelVisibility,
+  )
+  const [isPipetteActive, setIsPipetteActive] = useState(false)
+  const [pixelSample, setPixelSample] = useState<PixelSample | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const displayedImageData = useMemo(() => {
+    if (!imageDocument) {
+      return null
+    }
+
+    return applyChannelVisibility(imageDocument.imageData, channelVisibility)
+  }, [imageDocument, channelVisibility])
 
   async function handleFileChange(file: File | null) {
     if (!file) {
@@ -26,6 +48,8 @@ function App() {
     try {
       const nextImageDocument = await loadImageFile(file)
       setImageDocument(nextImageDocument)
+      setChannelVisibility(createDefaultChannelVisibility())
+      setPixelSample(null)
     } catch (error) {
       const message =
         error instanceof Error
@@ -38,7 +62,7 @@ function App() {
   }
 
   async function handleDownload() {
-    if (!imageDocument) {
+    if (!imageDocument || !displayedImageData) {
       return
     }
 
@@ -46,7 +70,11 @@ function App() {
     setErrorMessage('')
 
     try {
-      const blob = await exportImageFile(imageDocument, exportFormat)
+      const exportDocument = {
+        ...imageDocument,
+        imageData: displayedImageData,
+      }
+      const blob = await exportImageFile(exportDocument, exportFormat)
       const fileName = getExportFileName(imageDocument.fileName, exportFormat)
 
       downloadBlob(blob, fileName)
@@ -61,6 +89,14 @@ function App() {
     }
   }
 
+  function handleChannelToggle(channel: ChannelKey) {
+    setChannelVisibility((currentVisibility) => ({
+      ...currentVisibility,
+      [channel]: !currentVisibility[channel],
+    }))
+    setPixelSample(null)
+  }
+
   return (
     <div className="app">
       <Header />
@@ -69,16 +105,33 @@ function App() {
         canDownload={Boolean(imageDocument)}
         isLoading={isLoading}
         isExporting={isExporting}
+        isPipetteActive={isPipetteActive}
         onFileChange={handleFileChange}
         onExportFormatChange={setExportFormat}
         onDownload={handleDownload}
+        onTogglePipette={() => setIsPipetteActive((isActive) => !isActive)}
       />
-      <Workspace imageDocument={imageDocument} />
+      <div className="editor-body">
+        <Workspace
+          imageDocument={imageDocument}
+          displayedImageData={displayedImageData}
+          isPipetteActive={isPipetteActive}
+          onPixelPick={setPixelSample}
+        />
+        <ChannelPanel
+          imageDocument={imageDocument}
+          channelVisibility={channelVisibility}
+          pixelSample={pixelSample}
+          onToggleChannel={handleChannelToggle}
+        />
+      </div>
       <StatusBar
         imageDocument={imageDocument}
         errorMessage={errorMessage}
         isLoading={isLoading}
         isExporting={isExporting}
+        isPipetteActive={isPipetteActive}
+        pixelSample={pixelSample}
       />
     </div>
   )

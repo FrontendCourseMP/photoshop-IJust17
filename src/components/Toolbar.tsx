@@ -6,8 +6,10 @@ type ToolbarProps = {
   onFileChange: (file: File | null) => void
   onExportFormatChange: (format: ExportFormat) => void
   onDownload: () => void
+  onTogglePipette: () => void
   isLoading: boolean
   isExporting: boolean
+  isPipetteActive: boolean
 }
 
 export function Toolbar({
@@ -16,8 +18,10 @@ export function Toolbar({
   onFileChange,
   onExportFormatChange,
   onDownload,
+  onTogglePipette,
   isLoading,
   isExporting,
+  isPipetteActive,
 }: ToolbarProps) {
   const isBusy = isLoading || isExporting
 
@@ -38,6 +42,18 @@ export function Toolbar({
             event.currentTarget.value = ''
           }}
         />
+      </div>
+
+      <div className="toolbar-group">
+        <span className="field-label">Инструмент</span>
+        <button
+          className={`button ${isPipetteActive ? 'button-active' : ''}`}
+          type="button"
+          disabled={!canDownload || isBusy}
+          onClick={onTogglePipette}
+        >
+          Пипетка
+        </button>
       </div>
 
       <div className="toolbar-group">
