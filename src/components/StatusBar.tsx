@@ -7,6 +7,7 @@ type StatusBarProps = {
   isExporting: boolean
   isPipetteActive: boolean
   isLevelsOpen: boolean
+  displayScalePercent: number
   pixelSample: PixelSample | null
 }
 
@@ -17,6 +18,7 @@ export function StatusBar({
   isExporting,
   isPipetteActive,
   isLevelsOpen,
+  displayScalePercent,
   pixelSample,
 }: StatusBarProps) {
   const fileName = imageDocument?.fileName ?? 'не выбран'
@@ -32,6 +34,7 @@ export function StatusBar({
       <span>Формат: {format}</span>
       <span>Размер: {size}</span>
       <span>Глубина цвета: {colorDepth}</span>
+      <span>Масштаб: {displayScalePercent}%</span>
       {isPipetteActive && <span>Пипетка: активна</span>}
       {isLevelsOpen && <span>Уровни: открыты</span>}
       {pixelSample && (

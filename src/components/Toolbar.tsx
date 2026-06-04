@@ -8,10 +8,15 @@ type ToolbarProps = {
   onDownload: () => void
   onTogglePipette: () => void
   onOpenLevels: () => void
+  onOpenResize: () => void
   isLoading: boolean
   isExporting: boolean
   isPipetteActive: boolean
   canOpenLevels: boolean
+  canOpenResize: boolean
+  canScale: boolean
+  displayScalePercent: number
+  onDisplayScaleChange: (scale: number) => void
 }
 
 export function Toolbar({
@@ -22,10 +27,15 @@ export function Toolbar({
   onDownload,
   onTogglePipette,
   onOpenLevels,
+  onOpenResize,
   isLoading,
   isExporting,
   isPipetteActive,
   canOpenLevels,
+  canOpenResize,
+  canScale,
+  displayScalePercent,
+  onDisplayScaleChange,
 }: ToolbarProps) {
   const isBusy = isLoading || isExporting
 
@@ -46,6 +56,23 @@ export function Toolbar({
             event.currentTarget.value = ''
           }}
         />
+      </div>
+
+      <div className="toolbar-group toolbar-scale">
+        <label className="field-label" htmlFor="display-scale">
+          Масштаб
+        </label>
+        <input
+          className="scale-range"
+          id="display-scale"
+          type="range"
+          min="12"
+          max="300"
+          value={displayScalePercent}
+          disabled={!canScale || isBusy}
+          onChange={(event) => onDisplayScaleChange(Number(event.target.value))}
+        />
+        <output>{displayScalePercent}%</output>
       </div>
 
       <div className="toolbar-group">
@@ -69,6 +96,14 @@ export function Toolbar({
           onClick={onOpenLevels}
         >
           Уровни
+        </button>
+        <button
+          className="button"
+          type="button"
+          disabled={!canOpenResize || isBusy}
+          onClick={onOpenResize}
+        >
+          Размер
         </button>
       </div>
 

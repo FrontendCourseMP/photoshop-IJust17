@@ -1,28 +1,60 @@
 import { useEffect, useRef, type MouseEvent } from 'react'
 import { getPixelSample } from '../image/channelUtils'
+import { clampDisplayScale } from '../image/scaleUtils'
 import type { ImageDocument } from '../image/imageTypes'
 
 type WorkspaceProps = {
   imageDocument: ImageDocument | null
+  renderedImageData: ImageData | null
   displayedImageData: ImageData | null
   isPipetteActive: boolean
+  autoScaleKey: number
+  onAutoScale: (scale: number) => void
   onPixelPick: (sample: ReturnType<typeof getPixelSample>) => void
 }
 
 export function Workspace({
   imageDocument,
+  renderedImageData,
   displayedImageData,
   isPipetteActive,
+  autoScaleKey,
+  onAutoScale,
   onPixelPick,
 }: WorkspaceProps) {
+  const workspaceRef = useRef<HTMLElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const canvasWidth = displayedImageData?.width ?? 640
-  const canvasHeight = displayedImageData?.height ?? 360
+  const canvasWidth = renderedImageData?.width ?? 640
+  const canvasHeight = renderedImageData?.height ?? 360
+  const imageWidth = imageDocument?.width ?? 0
+  const imageHeight = imageDocument?.height ?? 0
+
+  useEffect(() => {
+    const workspace = workspaceRef.current
+
+    if (!workspace || imageWidth === 0 || imageHeight === 0 || autoScaleKey === 0) {
+      return
+    }
+
+    const frameId = requestAnimationFrame(() => {
+      const rect = workspace.getBoundingClientRect()
+      const availableWidth = Math.max(1, rect.width - 100)
+      const availableHeight = Math.max(1, rect.height - 100)
+      const scale = Math.min(
+        (availableWidth / imageWidth) * 100,
+        (availableHeight / imageHeight) * 100,
+      )
+
+      onAutoScale(clampDisplayScale(scale))
+    })
+
+    return () => cancelAnimationFrame(frameId)
+  }, [autoScaleKey, imageWidth, imageHeight, onAutoScale])
 
   useEffect(() => {
     const canvas = canvasRef.current
 
-    if (!canvas || !displayedImageData) {
+    if (!canvas || !renderedImageData) {
       return
     }
 
@@ -32,8 +64,8 @@ export function Workspace({
       return
     }
 
-    context.putImageData(displayedImageData, 0, 0)
-  }, [displayedImageData])
+    context.putImageData(renderedImageData, 0, 0)
+  }, [renderedImageData])
 
   function handleCanvasClick(event: MouseEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current
@@ -43,10 +75,14 @@ export function Workspace({
     }
 
     const rect = canvas.getBoundingClientRect()
-    const x = Math.floor(((event.clientX - rect.left) * canvas.width) / rect.width)
-    const y = Math.floor(
+    const canvasX = Math.floor(
+      ((event.clientX - rect.left) * canvas.width) / rect.width,
+    )
+    const canvasY = Math.floor(
       ((event.clientY - rect.top) * canvas.height) / rect.height,
     )
+    const x = Math.floor((canvasX * displayedImageData.width) / canvas.width)
+    const y = Math.floor((canvasY * displayedImageData.height) / canvas.height)
 
     if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) {
       return
@@ -56,7 +92,7 @@ export function Workspace({
   }
 
   return (
-    <main className="workspace">
+    <main className="workspace" ref={workspaceRef}>
       <div className="canvas-wrapper">
         <canvas
           ref={canvasRef}
