@@ -6,6 +6,7 @@ type StatusBarProps = {
   isLoading: boolean
   isExporting: boolean
   isPipetteActive: boolean
+  isLevelsOpen: boolean
   pixelSample: PixelSample | null
 }
 
@@ -15,6 +16,7 @@ export function StatusBar({
   isLoading,
   isExporting,
   isPipetteActive,
+  isLevelsOpen,
   pixelSample,
 }: StatusBarProps) {
   const fileName = imageDocument?.fileName ?? 'не выбран'
@@ -31,6 +33,7 @@ export function StatusBar({
       <span>Размер: {size}</span>
       <span>Глубина цвета: {colorDepth}</span>
       {isPipetteActive && <span>Пипетка: активна</span>}
+      {isLevelsOpen && <span>Уровни: открыты</span>}
       {pixelSample && (
         <span>
           Пиксель: X {pixelSample.x}, Y {pixelSample.y}

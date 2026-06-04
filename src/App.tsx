@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ChannelPanel } from './components/ChannelPanel'
 import { Header } from './components/Header'
+import { LevelsDialog } from './components/LevelsDialog'
 import { StatusBar } from './components/StatusBar'
 import { Toolbar } from './components/Toolbar'
 import { Workspace } from './components/Workspace'
@@ -26,16 +27,20 @@ function App() {
   )
   const [isPipetteActive, setIsPipetteActive] = useState(false)
   const [pixelSample, setPixelSample] = useState<PixelSample | null>(null)
+  const [isLevelsOpen, setIsLevelsOpen] = useState(false)
+  const [levelsPreviewImageData, setLevelsPreviewImageData] =
+    useState<ImageData | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const sourceImageData = levelsPreviewImageData ?? imageDocument?.imageData ?? null
   const displayedImageData = useMemo(() => {
-    if (!imageDocument) {
+    if (!sourceImageData) {
       return null
     }
 
-    return applyChannelVisibility(imageDocument.imageData, channelVisibility)
-  }, [imageDocument, channelVisibility])
+    return applyChannelVisibility(sourceImageData, channelVisibility)
+  }, [sourceImageData, channelVisibility])
 
   async function handleFileChange(file: File | null) {
     if (!file) {
@@ -50,6 +55,8 @@ function App() {
       setImageDocument(nextImageDocument)
       setChannelVisibility(createDefaultChannelVisibility())
       setPixelSample(null)
+      setLevelsPreviewImageData(null)
+      setIsLevelsOpen(false)
     } catch (error) {
       const message =
         error instanceof Error
@@ -97,6 +104,27 @@ function App() {
     setPixelSample(null)
   }
 
+  function handleLevelsApply(nextImageData: ImageData) {
+    if (!imageDocument) {
+      return
+    }
+
+    setImageDocument({
+      ...imageDocument,
+      imageData: nextImageData,
+      width: nextImageData.width,
+      height: nextImageData.height,
+    })
+    setLevelsPreviewImageData(null)
+    setIsLevelsOpen(false)
+    setPixelSample(null)
+  }
+
+  function handleLevelsCancel() {
+    setLevelsPreviewImageData(null)
+    setIsLevelsOpen(false)
+  }
+
   return (
     <div className="app">
       <Header />
@@ -106,10 +134,12 @@ function App() {
         isLoading={isLoading}
         isExporting={isExporting}
         isPipetteActive={isPipetteActive}
+        canOpenLevels={Boolean(imageDocument)}
         onFileChange={handleFileChange}
         onExportFormatChange={setExportFormat}
         onDownload={handleDownload}
         onTogglePipette={() => setIsPipetteActive((isActive) => !isActive)}
+        onOpenLevels={() => setIsLevelsOpen(true)}
       />
       <div className="editor-body">
         <Workspace
@@ -131,7 +161,15 @@ function App() {
         isLoading={isLoading}
         isExporting={isExporting}
         isPipetteActive={isPipetteActive}
+        isLevelsOpen={isLevelsOpen}
         pixelSample={pixelSample}
+      />
+      <LevelsDialog
+        imageDocument={imageDocument}
+        open={isLevelsOpen}
+        onPreviewChange={setLevelsPreviewImageData}
+        onApply={handleLevelsApply}
+        onCancel={handleLevelsCancel}
       />
     </div>
   )

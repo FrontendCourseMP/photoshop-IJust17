@@ -7,9 +7,11 @@ type ToolbarProps = {
   onExportFormatChange: (format: ExportFormat) => void
   onDownload: () => void
   onTogglePipette: () => void
+  onOpenLevels: () => void
   isLoading: boolean
   isExporting: boolean
   isPipetteActive: boolean
+  canOpenLevels: boolean
 }
 
 export function Toolbar({
@@ -19,9 +21,11 @@ export function Toolbar({
   onExportFormatChange,
   onDownload,
   onTogglePipette,
+  onOpenLevels,
   isLoading,
   isExporting,
   isPipetteActive,
+  canOpenLevels,
 }: ToolbarProps) {
   const isBusy = isLoading || isExporting
 
@@ -53,6 +57,18 @@ export function Toolbar({
           onClick={onTogglePipette}
         >
           Пипетка
+        </button>
+      </div>
+
+      <div className="toolbar-group">
+        <span className="field-label">Коррекция</span>
+        <button
+          className="button"
+          type="button"
+          disabled={!canOpenLevels || isBusy}
+          onClick={onOpenLevels}
+        >
+          Уровни
         </button>
       </div>
 
