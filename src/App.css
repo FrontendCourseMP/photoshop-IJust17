@@ -324,6 +324,21 @@
   box-shadow: 0 24px 80px rgb(0 0 0 / 65%);
 }
 
+.kernel-dialog {
+  width: min(620px, calc(100vw - 28px));
+  max-height: calc(100vh - 36px);
+  padding: 0;
+  border: 1px solid #28633e;
+  border-radius: 8px;
+  color: #d9fce7;
+  background: #08170f;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 65%);
+}
+
+.kernel-dialog::backdrop {
+  background: rgb(0 0 0 / 62%);
+}
+
 .resize-dialog::backdrop {
   background: rgb(0 0 0 / 62%);
 }
@@ -481,6 +496,70 @@
   font-size: 14px;
 }
 
+.kernel-content {
+  padding: 14px 16px 4px;
+  display: grid;
+  gap: 14px;
+}
+
+.kernel-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(150px, 0.8fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.kernel-field {
+  display: grid;
+  gap: 6px;
+  color: #9de6b1;
+  font-size: 14px;
+}
+
+.kernel-field .select {
+  width: 100%;
+}
+
+.kernel-section {
+  display: grid;
+  gap: 9px;
+}
+
+.kernel-section h3 {
+  margin: 0;
+  color: #c9fbd8;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.kernel-grid {
+  width: min(100%, 240px);
+  display: grid;
+  grid-template-columns: repeat(3, 72px);
+  gap: 8px;
+}
+
+.kernel-input {
+  width: 72px;
+  text-align: center;
+}
+
+.kernel-channel-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.dialog-hint {
+  margin: 0;
+  color: #75b989;
+  font-size: 14px;
+}
+
+.kernel-content .dialog-error {
+  margin: 0;
+}
+
 @media (max-width: 640px) {
   .top-bar,
   .toolbar,
@@ -505,6 +584,19 @@
 
   .levels-controls label {
     grid-template-columns: 1fr;
+  }
+
+  .kernel-row {
+    grid-template-columns: 1fr;
+  }
+
+  .kernel-grid {
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .kernel-input {
+    width: 100%;
   }
 
   .levels-actions {

@@ -9,11 +9,13 @@ type ToolbarProps = {
   onTogglePipette: () => void
   onOpenLevels: () => void
   onOpenResize: () => void
+  onOpenFilter: () => void
   isLoading: boolean
   isExporting: boolean
   isPipetteActive: boolean
   canOpenLevels: boolean
   canOpenResize: boolean
+  canOpenFilter: boolean
   canScale: boolean
   displayScalePercent: number
   onDisplayScaleChange: (scale: number) => void
@@ -28,11 +30,13 @@ export function Toolbar({
   onTogglePipette,
   onOpenLevels,
   onOpenResize,
+  onOpenFilter,
   isLoading,
   isExporting,
   isPipetteActive,
   canOpenLevels,
   canOpenResize,
+  canOpenFilter,
   canScale,
   displayScalePercent,
   onDisplayScaleChange,
@@ -104,6 +108,14 @@ export function Toolbar({
           onClick={onOpenResize}
         >
           Размер
+        </button>
+        <button
+          className="button"
+          type="button"
+          disabled={!canOpenFilter || isBusy}
+          onClick={onOpenFilter}
+        >
+          Фильтры
         </button>
       </div>
 

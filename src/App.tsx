@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ChannelPanel } from './components/ChannelPanel'
 import { Header } from './components/Header'
+import { KernelFilterDialog } from './components/KernelFilterDialog'
 import { LevelsDialog } from './components/LevelsDialog'
 import { ResizeDialog } from './components/ResizeDialog'
 import { StatusBar } from './components/StatusBar'
@@ -34,14 +35,21 @@ function App() {
   const [pixelSample, setPixelSample] = useState<PixelSample | null>(null)
   const [isLevelsOpen, setIsLevelsOpen] = useState(false)
   const [isResizeOpen, setIsResizeOpen] = useState(false)
+  const [isKernelFilterOpen, setIsKernelFilterOpen] = useState(false)
   const [levelsPreviewImageData, setLevelsPreviewImageData] =
+    useState<ImageData | null>(null)
+  const [kernelPreviewImageData, setKernelPreviewImageData] =
     useState<ImageData | null>(null)
   const [displayScalePercent, setDisplayScalePercent] = useState(100)
   const [imageVersion, setImageVersion] = useState(0)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
-  const sourceImageData = levelsPreviewImageData ?? imageDocument?.imageData ?? null
+  const sourceImageData =
+    kernelPreviewImageData ??
+    levelsPreviewImageData ??
+    imageDocument?.imageData ??
+    null
   const displayedImageData = useMemo(() => {
     if (!sourceImageData) {
       return null
@@ -79,8 +87,10 @@ function App() {
       setChannelVisibility(createDefaultChannelVisibility())
       setPixelSample(null)
       setLevelsPreviewImageData(null)
+      setKernelPreviewImageData(null)
       setIsLevelsOpen(false)
       setIsResizeOpen(false)
+      setIsKernelFilterOpen(false)
       setDisplayScalePercent(100)
       setImageVersion((currentVersion) => currentVersion + 1)
     } catch (error) {
@@ -147,7 +157,9 @@ function App() {
       height: nextImageData.height,
     })
     setLevelsPreviewImageData(null)
+    setKernelPreviewImageData(null)
     setIsLevelsOpen(false)
+    setIsKernelFilterOpen(false)
     setPixelSample(null)
   }
 
@@ -168,9 +180,54 @@ function App() {
       height: nextImageData.height,
     })
     setLevelsPreviewImageData(null)
+    setKernelPreviewImageData(null)
     setIsResizeOpen(false)
+    setIsKernelFilterOpen(false)
     setPixelSample(null)
     setImageVersion((currentVersion) => currentVersion + 1)
+  }
+
+  function handleKernelFilterApply(nextImageData: ImageData) {
+    if (!imageDocument) {
+      return
+    }
+
+    setImageDocument({
+      ...imageDocument,
+      imageData: nextImageData,
+      width: nextImageData.width,
+      height: nextImageData.height,
+    })
+    setLevelsPreviewImageData(null)
+    setKernelPreviewImageData(null)
+    setIsKernelFilterOpen(false)
+    setPixelSample(null)
+  }
+
+  function handleKernelFilterCancel() {
+    setKernelPreviewImageData(null)
+    setIsKernelFilterOpen(false)
+  }
+
+  function openLevelsDialog() {
+    setKernelPreviewImageData(null)
+    setIsKernelFilterOpen(false)
+    setIsLevelsOpen(true)
+  }
+
+  function openResizeDialog() {
+    setLevelsPreviewImageData(null)
+    setKernelPreviewImageData(null)
+    setIsLevelsOpen(false)
+    setIsKernelFilterOpen(false)
+    setIsResizeOpen(true)
+  }
+
+  function openKernelFilterDialog() {
+    setLevelsPreviewImageData(null)
+    setIsLevelsOpen(false)
+    setIsResizeOpen(false)
+    setIsKernelFilterOpen(true)
   }
 
   return (
@@ -184,14 +241,16 @@ function App() {
         isPipetteActive={isPipetteActive}
         canOpenLevels={Boolean(imageDocument)}
         canOpenResize={Boolean(imageDocument)}
+        canOpenFilter={Boolean(imageDocument)}
         canScale={Boolean(imageDocument)}
         displayScalePercent={displayScalePercent}
         onFileChange={handleFileChange}
         onExportFormatChange={setExportFormat}
         onDownload={handleDownload}
         onTogglePipette={() => setIsPipetteActive((isActive) => !isActive)}
-        onOpenLevels={() => setIsLevelsOpen(true)}
-        onOpenResize={() => setIsResizeOpen(true)}
+        onOpenLevels={openLevelsDialog}
+        onOpenResize={openResizeDialog}
+        onOpenFilter={openKernelFilterDialog}
         onDisplayScaleChange={handleDisplayScaleChange}
       />
       <div className="editor-body">
@@ -233,6 +292,13 @@ function App() {
         open={isResizeOpen}
         onApply={handleResizeApply}
         onCancel={() => setIsResizeOpen(false)}
+      />
+      <KernelFilterDialog
+        imageDocument={imageDocument}
+        open={isKernelFilterOpen}
+        onPreviewChange={setKernelPreviewImageData}
+        onApply={handleKernelFilterApply}
+        onCancel={handleKernelFilterCancel}
       />
     </div>
   )
